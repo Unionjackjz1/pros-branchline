@@ -1,0 +1,23 @@
+[build-system]
+requires = ['setuptools']
+build-backend = 'setuptools.build_meta'
+
+[project]
+name = 'pros-branchline'
+dependencies = [
+    'Cerberus',
+    'jsonpickle',
+    'pros-cli',
+    'PyYAML',
+    'semantic-version',
+]
+dynamic = ['version']
+
+[project.scripts]
+build-depot = 'build_depot:main'
+
+[tool.setuptools]
+packages = ['build_depot']
+
+[tool.setuptools.dynamic]
+version = {attr = 'build_depot.__version__'}
