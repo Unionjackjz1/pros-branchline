@@ -42,7 +42,10 @@ def main():
                         target = val.get('target', data.get('target')) if isinstance(val, dict) else data.get('target')
 
                         template_objects.append(BaseTemplate(
-                            metadata={'location': location.format(name=data.get('name'), version=version)},
+                            metadata=dict(
+                                {'location': location.format(name=data.get('name'), version=version)},
+                                **data.get('metadata', {})
+                            ),
                             name=data.get('name'),
                             supported_kernels=val.get('kernel') if isinstance(val, dict) else val,
                             target=target,

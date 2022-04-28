@@ -20,6 +20,16 @@ schema = {
     'name': {'type': 'string', 'required': True},
     'target': {'type': 'string', 'allowed': ['v5', 'cortex']},
     'location': {'type': 'string'},
+    'metadata': {
+        'type': 'dict',
+        'schema': {
+            'description': {'type': 'string'},
+            'website': {'type': 'string'},
+            'license': {'type': 'string'},
+            'authors': {'type': 'list', 'schema': {'type': 'string'}},
+            'keywords': {'type': 'list', 'schema': {'type': 'string'}}
+        }
+    },
     'versions': {
         'type': 'dict',
         'required': True,
