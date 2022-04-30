@@ -2,3 +2,5 @@ build
 venv
 pros-branchline.json
 *.egg-info/
+__pycache__
+checks.json

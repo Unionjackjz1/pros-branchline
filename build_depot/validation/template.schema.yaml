@@ -1,0 +1,50 @@
+type: object
+required:
+  - name
+  - target
+  - versions
+properties:
+  name:
+    type: string
+  target: &target
+    type: string
+    enum:
+      - v5
+      - cortex
+  location: &location
+    type: string
+  metadata:
+    type: object
+    properties:
+      description:
+        type: string
+      website:
+        type: string
+      license:
+        type: string
+      authors:
+        type: array
+        items:
+          type: string
+      keywords:
+        type: array
+        items:
+          type: string
+  versions:
+    type: object
+    patternProperties:
+      # https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
+      '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-(0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*)?(\+[0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*)?$':
+        oneOf:
+          - type: string
+            # https://regex101.com/r/mJcrs6/1 based on https://github.com/rbarrois/python-semanticversion/blob/master/semantic_version/base.py#L1019
+            pattern: &semver-range |-
+              ^((<|<=||=|==|>=|>|!=|\^|~|~=)(\*|0|[1-9][0-9]*)(?:\.(\*|0|[1-9][0-9]*)(?:\.(\*|0|[1-9][0-9]*))?)?(?:-([a-z0-9A-Z.-]*))?(?:\+([a-z0-9A-Z.-]*))?)(,((<|<=||=|==|>=|>|!=|\^|~|~=)(\*|0|[1-9][0-9]*)(?:\.(\*|0|[1-9][0-9]*)(?:\.(\*|0|[1-9][0-9]*))?)?(?:-([a-z0-9A-Z.-]*))?(?:\+([a-z0-9A-Z.-]*))?))*$
+          - type: object
+            minProperties: 1
+            properties:
+              kernel:
+                type: string
+                pattern: *semver-range
+              location: *location
+              target: *target
