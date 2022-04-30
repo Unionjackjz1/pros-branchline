@@ -33,11 +33,11 @@ def _load_templates(paths: List[pathlib.Path]):
     for path in paths:
         if path.is_dir():
             templates.update({
-                f'{t.stem}': yaml.load(t.open('r'), MarkedSafeLoader) for t in path.iterdir() if t.suffix == '.yaml'
+                f'{t}': yaml.load(t.open('r'), MarkedSafeLoader) for t in path.iterdir() if t.suffix == '.yaml'
             })
         else:
             if path.suffix == '.yaml':
-                templates.update(**{f'{path.stem}': yaml.load(path.open('r'), MarkedSafeLoader)})
+                templates.update(**{f'{path}': yaml.load(path.open('r'), MarkedSafeLoader)})
     return templates
 
 
@@ -50,18 +50,11 @@ def check(args):
     )
     validator = jsonschema.Draft202012Validator(schema)
 
-    by_file = {}
+    checks = []
 
     failure = False
     for name, instance in templates.items():
         print(f'Validating {name}: ')
-
-        by_file[f'{name}.yaml'] = {
-            'counts': {
-                'failure': 0
-            },
-            'details': []
-        }
 
         for error in validator.iter_errors(instance):
             path = error.json_path
@@ -74,15 +67,15 @@ def check(args):
             mark = [m.value for m in jsonpath.parse(path).find(instance)][0]
 
             sep = '\n- '
-            by_file[f'{name}.yaml']['counts']['failure'] += 1
-            by_file[f'{name}.yaml']['details'].append({
-                'category': 'failure',
-                'title': error.message,
-                'message': f'{sep.join([s.message for s in sorted(error.context, key=lambda e: e.schema_path)])}',
-                'startLine': mark['start']['line'],
-                'startColumn': mark['start']['col']
+            m = jsonschema.exceptions.best_match(error.context)
+            checks.append({
+                'path': name,
+                'line': mark['start']['line'],
+                'title': 'PROS template schema validation error',
+                'message': m.message if m is not None else error.message,
+                'annotation_level': 'failure',
             })
-            print(f'\t{name}.yaml:{mark["start"]["line"]}:{mark["start"]["col"]} {error.json_path}: {error.message}')
+            print(f'\t{name}:{mark["start"]["line"]}:{mark["start"]["col"]} {error.json_path}: {error.message}')
 
             for suberror in sorted(error.context, key=lambda e: e.schema_path):
                 print(f"\t\t{'.'.join(list(suberror.path))}: {suberror.message}")
@@ -91,18 +84,9 @@ def check(args):
 
         print('PASS' if not failure else 'FAIL')
 
-        check_results = {
-            'name': 'PROS Template Schema Validation',
-            'summary': 'PASS' if not failure else 'FAIL',
-            'counts': {
-                'failure': sum([val['counts']['failure'] for _, val in by_file.items()])
-            },
-            'byFile': by_file
-        }
-
         if args.output_file is not None:
             with open(args.output_file, 'w') as f:
-                f.write(jsonpickle.pickler.encode(check_results, indent=3, unpicklable=False))
+                f.write(jsonpickle.pickler.encode(checks, indent=3, unpicklable=False))
 
     return failure
 
