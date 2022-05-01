@@ -4,6 +4,13 @@ build-backend = 'setuptools.build_meta'
 
 [project]
 name = 'pros-branchline'
+description = 'Build a PROS remote depot'
+keywords = ['pros', 'pros-cli', 'vex', 'v5', 'cortex']
+readme = 'README.md'
+authors = [
+    { name = 'Alex Brooke', email = 'akb.sbc@gmail.com' },
+]
+requires-python = '>=3.9.0'
 dependencies = [
     'jsonpath-ng',
     'jsonpickle',

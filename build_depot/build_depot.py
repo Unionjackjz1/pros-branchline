@@ -92,7 +92,7 @@ def check(args):
 
 
 def build(args):
-    templates = _load_templates(args)
+    templates = _load_templates(args.paths)
     template_data = [BaseTemplate(
         metadata=dict({
                 'location': (
@@ -128,12 +128,12 @@ def main():
         print('command has no effect')
         return 0
 
-    ok = True
+    failed = False
     if not args.no_check:
-        ok = check(args)
+        failed = check(args)
 
-    if not ok:
-        return -1
+    if failed:
+        return 1
 
     if args.build is not None:
         build(args)
