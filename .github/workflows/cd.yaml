@@ -20,7 +20,9 @@ jobs:
           key: ${{ env.pythonLocation }}-${{ hashFiles('pyproject.toml') }}-${{ hashFiles('build_depot/**') }}
       - run: python -m pip install --upgrade --upgrade-strategy eager .
       - run: |
+          ls -la .
           build-depot -b pros-branchline ./templates/*
+          ls -la .
           mkdir serve
           cp ./pros-branchline.json serve/
       - uses: JamesIves/github-pages-deploy-action@v4.3.3
