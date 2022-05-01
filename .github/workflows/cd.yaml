@@ -1,0 +1,29 @@
+name: CD
+on:
+  push:
+    branches:
+      - main
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+        with:
+          python-version: '>=3.9.0'
+      # cache the build-depot package and its dependencies to avoid rebuilding them every time we only change/add a
+      # template schema (but rebuild if pyproject.toml or anything under build_depot has changed)
+      - uses: actions/cache@v3
+        id: pip-cache
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ env.pythonLocation }}-${{ hashFiles('pyproject.toml') }}-${{ hashFiles('build_depot/**') }}
+      - run: python -m pip install --upgrade --upgrade-strategy eager .
+      - run: |
+          build-depot -b pros-branchline ./templates/*
+          mkdir site
+          cp ./pros-branchline.json serve/
+      - uses: JamesIves/github-pages-deploy-action@v4.3.3
+        with:
+          branch: gh-pages
+          folder: serve
